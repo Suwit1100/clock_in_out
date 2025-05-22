@@ -9,7 +9,7 @@
 
 @theme {
     --font-sans:
-        'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+        'IBM Plex Sans Thai', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 
     --radius-lg: var(--radius);
     --radius-md: calc(var(--radius) - 2px);
@@ -78,25 +78,25 @@
 }
 
 :root {
-    --background: oklch(1 0 0);
-    --foreground: oklch(0.145 0 0);
-    --card: oklch(1 0 0);
-    --card-foreground: oklch(0.145 0 0);
-    --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.145 0 0);
-    --primary: oklch(0.205 0 0);
-    --primary-foreground: oklch(0.985 0 0);
-    --secondary: oklch(0.97 0 0);
-    --secondary-foreground: oklch(0.205 0 0);
-    --muted: oklch(0.97 0 0);
-    --muted-foreground: oklch(0.556 0 0);
-    --accent: oklch(0.97 0 0);
-    --accent-foreground: oklch(0.205 0 0);
+    --background: oklch(1 0 0); /* = #ffffff */
+    --foreground: oklch(0 0 0); /* = #000000 */
+    --card: var(--background);
+    --card-foreground: var(--foreground);
+    --popover: var(--background);
+    --popover-foreground: var(--foreground);
+    --primary: oklch(0.8647 0.2092 85.67); /* ~ #fcb913 (เหลือง) */
+    --primary-foreground: oklch(0.2 0 0); /* = สีเข้ม ใช้กับปุ่มเหลือง */
+    --secondary: oklch(0.295 0.057 267); /* ~ #1b2b3a (น้ำเงินเข้ม) */
+    --secondary-foreground: oklch(1 0 0); /* = ขาว */
+    --muted: oklch(0.95 0 0); /* สีเทาอ่อน */
+    --muted-foreground: oklch(0.45 0 0); /* เทาเข้ม */
+    --accent: oklch(0.97 0.02 70); /* เหลืองอ่อน */
+    --accent-foreground: oklch(0.2 0 0);
     --destructive: oklch(0.577 0.245 27.325);
     --destructive-foreground: oklch(0.577 0.245 27.325);
-    --border: oklch(0.922 0 0);
-    --input: oklch(0.922 0 0);
-    --ring: oklch(0.87 0 0);
+    --border: oklch(0.9 0 0); /* เทาชัดเจน */
+    --input: oklch(0.97 0 0);
+    --ring: oklch(0.85 0 0);
     --chart-1: oklch(0.646 0.222 41.116);
     --chart-2: oklch(0.6 0.118 184.704);
     --chart-3: oklch(0.398 0.07 227.392);
@@ -114,16 +114,16 @@
 }
 
 .dark {
-    --background: oklch(0.145 0 0);
-    --foreground: oklch(0.985 0 0);
+    --background: oklch(0.1 0 0); /* almost black */
+    --foreground: oklch(0.95 0 0); /* almost white */
     --card: oklch(0.145 0 0);
     --card-foreground: oklch(0.985 0 0);
     --popover: oklch(0.145 0 0);
     --popover-foreground: oklch(0.985 0 0);
-    --primary: oklch(0.985 0 0);
-    --primary-foreground: oklch(0.205 0 0);
-    --secondary: oklch(0.269 0 0);
-    --secondary-foreground: oklch(0.985 0 0);
+    --primary: oklch(0.8647 0.2092 85.67); /* เหลืองเดิม */
+    --primary-foreground: oklch(0.1 0 0); /* เข้มกว่า */
+    --secondary: oklch(0.295 0.057 267); /* น้ำเงิน */
+    --secondary-foreground: oklch(0.98 0 0); /* ขาว */
     --muted: oklch(0.269 0 0);
     --muted-foreground: oklch(0.708 0 0);
     --accent: oklch(0.269 0 0);
