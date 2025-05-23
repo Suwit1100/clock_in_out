@@ -14,7 +14,12 @@ Route::get('/auth/google-redirect', [GoogleAuthController::class, 'redirect'])
 Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback'])
     ->name('auth.google.callback');
 
-Route::get('/check-in-out', [AttendanceController::class, 'showCheckInOutPage'])->name('attendance.check_page');
+Route::middleware(['auth'])->group(function () {
+    Route::get('/check-in-out', [AttendanceController::class, 'showCheckInOutPage'])->name('attendance.check_page');
+    Route::post('/attendance/clock', [AttendanceController::class, 'clock'])->name('attendance.clock');
+});
+
+
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {

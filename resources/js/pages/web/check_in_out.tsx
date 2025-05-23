@@ -1,30 +1,73 @@
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import MainLayout from '@/layouts/client-layout';
-import { useForm } from '@inertiajs/react';
-import { useState } from 'react';
-import { AttendanceForm } from './types/check_in_out';
+import { useForm, usePage } from '@inertiajs/react';
+import { CheckCircleIcon, XCircleIcon } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { AttendanceForm, AttendanceRecord } from './types/check_in_out';
+
+interface ClockPageProps {
+    attendance?: AttendanceRecord;
+    [key: string]: any;
+}
 
 export default function ClockInOut() {
+    const { props } = usePage<ClockPageProps>();
+    const successMessage = props.flash?.success;
+    const branches = props.branches as { id: number; name: string }[];
+    const attendance = props.attendance;
+
     const [isOffsite, setIsOffsite] = useState(false);
+    const [now, setNow] = useState<string>(new Date().toLocaleString('th-TH', { dateStyle: 'long', timeStyle: 'medium' }));
 
     const { data, setData, post, processing, errors } = useForm<AttendanceForm>({
-        type: 'clock_in',
+        type: attendance && attendance.clock_in_time ? 'clock_out' : 'clock_in',
         branch_id: '',
         is_offsite: false,
-        offsite_lat: '',
-        offsite_lng: '',
+        lat: '',
+        lng: '',
         offsite_link: '',
     });
 
-    const handleSubmit = (type: 'clock_in' | 'clock_out') => {
-        setData('type', type);
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setNow(new Date().toLocaleString('th-TH', { dateStyle: 'long', timeStyle: 'medium' }));
+        }, 1000);
+        return () => clearInterval(timer);
+    }, []);
+
+    useEffect(() => {
+        if (!navigator.geolocation) {
+            console.warn('Geolocation not supported');
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const { latitude, longitude } = position.coords;
+                setData('lat', latitude.toString());
+                setData('lng', longitude.toString());
+            },
+            (error) => {
+                console.error('Error getting location:', error);
+            },
+            { enableHighAccuracy: true },
+        );
+    }, []);
+
+    const handleSubmit = () => {
         post(route('attendance.clock'), {
             onSuccess: () => {
-                // handle success
+                // handle success (reload page or show message)
             },
         });
     };
+
+    const isClockedIn = attendance && attendance.clock_in_time && !attendance.clock_out_time;
+    const buttonLabel = isClockedIn ? 'Clock Out' : 'Clock In';
 
     return (
         <MainLayout>
@@ -32,18 +75,20 @@ export default function ClockInOut() {
                 <Card className="w-full max-w-xl shadow-md">
                     <CardContent className="space-y-4 py-6">
                         <h2 className="text-center text-xl font-semibold">ลงเวลาเข้า-ออกงาน</h2>
+                        <div className="text-muted-foreground text-center text-sm">{now}</div>
 
                         <div className="flex items-center space-x-2">
-                            <input
-                                type="checkbox"
+                            <Checkbox
+                                id="offsite"
                                 checked={isOffsite}
-                                onChange={(e) => {
-                                    const checked = e.target.checked;
+                                onCheckedChange={(checked: boolean) => {
                                     setIsOffsite(checked);
                                     setData('is_offsite', checked);
                                 }}
                             />
-                            <label>ทำงานนอกสถานที่</label>
+                            <label htmlFor="offsite" className="text-sm">
+                                ทำงานนอกสถานที่
+                            </label>
                         </div>
 
                         {isOffsite ? (
@@ -60,33 +105,48 @@ export default function ClockInOut() {
                         ) : (
                             <div className="space-y-2">
                                 <label className="block text-sm font-medium">เลือกสาขา</label>
-                                <select
-                                    className="w-full rounded border px-3 py-2"
-                                    value={data.branch_id}
-                                    onChange={(e) => setData('branch_id', e.target.value)}
-                                >
-                                    <option value="">-- เลือกสาขา --</option>
-                                    <option value="1">สำนักงานใหญ่</option>
-                                    <option value="2">สาขาเชียงใหม่</option>
-                                </select>
+                                <Select value={data.branch_id} onValueChange={(value) => setData('branch_id', value)}>
+                                    <SelectTrigger className="w-full">
+                                        <SelectValue placeholder="-- เลือกสาขา --" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectGroup>
+                                            <SelectLabel>สาขา</SelectLabel>
+                                            {branches?.map((branch) => (
+                                                <SelectItem key={branch.id} value={String(branch.id)}>
+                                                    {branch.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select>
                             </div>
                         )}
 
-                        <div className="flex justify-center space-x-4 pt-4">
-                            <Button onClick={() => handleSubmit('clock_in')} disabled={processing}>
-                                Clock In
-                            </Button>
-                            <Button onClick={() => handleSubmit('clock_out')} disabled={processing} variant="secondary">
-                                Clock Out
+                        <div className="flex justify-center pt-4">
+                            <Button onClick={handleSubmit} disabled={processing}>
+                                {buttonLabel}
                             </Button>
                         </div>
 
+                        {successMessage && (
+                            <Alert className="border-green-300 bg-green-100 text-green-800">
+                                <CheckCircleIcon className="h-5 w-5" />
+                                <AlertTitle>สำเร็จ</AlertTitle>
+                                <AlertDescription>{successMessage}</AlertDescription>
+                            </Alert>
+                        )}
+
                         {Object.keys(errors).length > 0 && (
-                            <div className="text-sm text-red-500">
-                                {Object.values(errors).map((error, i) => (
-                                    <div key={i}>{error}</div>
-                                ))}
-                            </div>
+                            <Alert variant="destructive" className="border-red-300 bg-red-100 text-red-800">
+                                <XCircleIcon className="h-5 w-5" />
+                                <AlertTitle>เกิดข้อผิดพลาด</AlertTitle>
+                                <AlertDescription>
+                                    {Object.values(errors).map((error, i) => (
+                                        <div key={i}>{error}</div>
+                                    ))}
+                                </AlertDescription>
+                            </Alert>
                         )}
                     </CardContent>
                 </Card>
