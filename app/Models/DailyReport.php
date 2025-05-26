@@ -9,7 +9,7 @@ class DailyReport extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['attendance_id', 'summary_text', 'plan_text', 'note'];
+    protected $fillable = ['attendance_id', 'summary_text'];
 
     public function attendance()
     {

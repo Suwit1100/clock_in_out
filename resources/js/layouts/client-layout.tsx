@@ -12,6 +12,7 @@ const menuItems = [
     { icon: User, label: 'Profile', href: '#profile' },
     { icon: Bell, label: 'Notifications', href: '#notifications', badge: 3 },
     { icon: Settings, label: 'Settings', href: '#settings' },
+    { icon: Settings, label: 'ย้อนหลัง', href: '/daily-report/history' },
 ];
 
 const SearchInput = () => (

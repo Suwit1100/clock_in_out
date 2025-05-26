@@ -17,7 +17,7 @@ class BranchSeeder extends Seeder
             'name' => 'เจนบรรเจิด เมืองทอง',
             'latitude' => 13.9192663,
             'longitude' => 100.5374425,
-            'radius_meters' => 150,
+            'radius_meters' => 3000,
             'work_start_time' => '08:00:00',
             'work_end_time' => '17:00:00',
         ]);
@@ -26,7 +26,7 @@ class BranchSeeder extends Seeder
             'name' => 'เจนบรรเจิด วังน้อย',
             'latitude' => 14.1947401,
             'longitude' => 100.6443442,
-            'radius_meters' => 150,
+            'radius_meters' => 3000,
             'work_start_time' => '08:00:00',
             'work_end_time' => '17:00:00',
         ]);

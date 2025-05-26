@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\Web\AttendanceController;
+use App\Http\Controllers\Web\DailyReportController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -17,6 +18,8 @@ Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback'])
 Route::middleware(['auth'])->group(function () {
     Route::get('/check-in-out', [AttendanceController::class, 'showCheckInOutPage'])->name('attendance.check_page');
     Route::post('/attendance/clock', [AttendanceController::class, 'clock'])->name('attendance.clock');
+    Route::resource('/attendance/daily-report', DailyReportController::class);
+    Route::get('/daily-report/history', [DailyReportController::class, 'history'])->name('daily-report.history');
 });
 
 

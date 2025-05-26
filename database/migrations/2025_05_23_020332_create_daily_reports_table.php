@@ -14,9 +14,7 @@ return new class extends Migration
         Schema::create('daily_reports', function (Blueprint $table) {
             $table->id();
             $table->foreignId('attendance_id')->constrained()->onDelete('cascade');
-            $table->text('summary_text');
-            $table->text('plan_text');
-            $table->text('note')->nullable();
+            $table->text('summary_text')->nullable();
             $table->timestamps();
         });
     }

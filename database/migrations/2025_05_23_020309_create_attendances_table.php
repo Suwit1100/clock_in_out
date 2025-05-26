@@ -16,10 +16,12 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->date('date');
             $table->foreignId('branch_id')->nullable()->constrained()->onDelete('set null');
-            $table->boolean('is_offsite')->default(false);
+            $table->boolean('is_offsite_in')->default(false);
+            $table->boolean('is_offsite_out')->default(false);
             $table->decimal('offsite_latitude', 10, 7)->nullable();
             $table->decimal('offsite_longitude', 10, 7)->nullable();
-            $table->text('offsite_gmap_link')->nullable();
+            $table->text('offsite_gmap_link_in')->nullable();
+            $table->text('offsite_gmap_link_out')->nullable();
             $table->dateTime('clock_in_time');
             $table->decimal('clock_in_location_lat', 10, 7);
             $table->decimal('clock_in_location_lng', 10, 7);

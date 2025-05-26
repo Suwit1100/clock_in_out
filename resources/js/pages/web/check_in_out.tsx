@@ -1,11 +1,12 @@
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import AlertError from '@/components/alert-error';
+import AlertSuccess from '@/components/alert-success';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import MainLayout from '@/layouts/client-layout';
-import { useForm, usePage } from '@inertiajs/react';
-import { CheckCircleIcon, XCircleIcon } from 'lucide-react';
+import { Link, useForm, usePage } from '@inertiajs/react';
+import { LogIn, LogOut } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { AttendanceForm, AttendanceRecord } from './types/check_in_out';
 
@@ -67,15 +68,18 @@ export default function ClockInOut() {
     };
 
     const isClockedIn = attendance && attendance.clock_in_time && !attendance.clock_out_time;
+
+    console.log(isClockedIn);
+
     const buttonLabel = isClockedIn ? 'Clock Out' : 'Clock In';
 
     return (
         <MainLayout>
-            <div className="flex flex-1 items-center justify-center py-12">
+            <div className="flex flex-1 flex-col items-center justify-center py-12">
+                <div className="text-muted-foreground mb-4 text-center text-2xl">{now}</div>
                 <Card className="w-full max-w-xl shadow-md">
                     <CardContent className="space-y-4 py-6">
                         <h2 className="text-center text-xl font-semibold">ลงเวลาเข้า-ออกงาน</h2>
-                        <div className="text-muted-foreground text-center text-sm">{now}</div>
 
                         <div className="flex items-center space-x-2">
                             <Checkbox
@@ -123,30 +127,45 @@ export default function ClockInOut() {
                             </div>
                         )}
 
-                        <div className="flex justify-center pt-4">
-                            <Button onClick={handleSubmit} disabled={processing}>
-                                {buttonLabel}
-                            </Button>
-                        </div>
-
-                        {successMessage && (
-                            <Alert className="border-green-300 bg-green-100 text-green-800">
-                                <CheckCircleIcon className="h-5 w-5" />
-                                <AlertTitle>สำเร็จ</AlertTitle>
-                                <AlertDescription>{successMessage}</AlertDescription>
-                            </Alert>
+                        {/*  แสดงเวลาเข้างานและออกงาน */}
+                        {attendance?.clock_in_time && (
+                            <div className="flex items-center justify-center space-x-2 text-center text-sm text-green-700">
+                                <LogIn className="h-4 w-4 text-green-700" />
+                                <span>วันนี้เข้างานเวลา: {new Date(attendance.clock_in_time).toLocaleTimeString('th-TH')}</span>
+                            </div>
                         )}
 
+                        {attendance?.clock_out_time && (
+                            <div className="flex items-center justify-center space-x-2 text-center text-sm text-blue-700">
+                                <LogOut className="h-4 w-4 text-blue-700" />
+                                <span>วันนี้ออกงานเวลา: {new Date(attendance.clock_out_time).toLocaleTimeString('th-TH')}</span>
+                            </div>
+                        )}
+
+                        <div className="flex justify-end gap-2 pt-4">
+                            {/* ปุ่มเขียนรายงาน */}
+                            {attendance?.clock_in_time && !attendance?.clock_out_time && (
+                                <Button asChild variant="secondary">
+                                    <Link href={route('daily-report.create')}>เขียน Daily Report</Link>
+                                </Button>
+                            )}
+
+                            {/* ปุ่ม Clock In/Out */}
+                            {!attendance?.clock_out_time && (
+                                <Button onClick={handleSubmit} disabled={processing} variant="default">
+                                    {buttonLabel}
+                                </Button>
+                            )}
+                        </div>
+
+                        {successMessage && <AlertSuccess message={successMessage} />}
+
                         {Object.keys(errors).length > 0 && (
-                            <Alert variant="destructive" className="border-red-300 bg-red-100 text-red-800">
-                                <XCircleIcon className="h-5 w-5" />
-                                <AlertTitle>เกิดข้อผิดพลาด</AlertTitle>
-                                <AlertDescription>
-                                    {Object.values(errors).map((error, i) => (
-                                        <div key={i}>{error}</div>
-                                    ))}
-                                </AlertDescription>
-                            </Alert>
+                            <AlertError
+                                message={Object.values(errors)
+                                    .map((e) => `• ${e}`)
+                                    .join('\n')}
+                            />
                         )}
                     </CardContent>
                 </Card>
