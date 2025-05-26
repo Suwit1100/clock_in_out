@@ -36,6 +36,7 @@ class DailyReportController extends Controller
      */
     public function store(Request $request)
     {
+        // dd($request->all());
         try {
             $validator = Validator::make($request->all(), [
                 'summary_text' => 'nullable|string',
@@ -88,7 +89,8 @@ class DailyReportController extends Controller
                 ->with('success', 'บันทึกรายงานเรียบร้อยแล้ว');
         } catch (\Throwable $e) {
             DB::rollBack();
-            report($e);
+            // report($e);
+            dd($e->getMessage());
 
             return back()
                 ->withErrors(['message' => 'เกิดข้อผิดพลาดขณะบันทึกรายงาน กรุณาลองใหม่'])
@@ -137,10 +139,65 @@ class DailyReportController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, $id)
     {
-        //
+        try {
+            $validator = Validator::make($request->all(), [
+                'summary_text' => 'nullable|string',
+                'tasks' => 'required|array|min:1',
+                'tasks.*.task_type' => 'required|string',
+                'tasks.*.project_name' => 'required|string',
+            ], [
+                'tasks.required' => 'กรุณาระบุรายการงานอย่างน้อย 1 รายการ',
+                'tasks.*.task_type.required' => 'กรุณาระบุประเภทงาน',
+                'tasks.*.project_name.required' => 'กรุณาระบุชื่อโปรเจกต์',
+            ]);
+
+            if ($validator->fails()) {
+                return back()->withErrors($validator)->withInput();
+            }
+
+            DB::beginTransaction();
+
+            // ตรวจสอบว่า report นี้เป็นของ user และวันนี้
+            $report = DailyReport::where('id', $id)
+                ->whereHas('attendance', function ($q) {
+                    $q->where('user_id', Auth::id())
+                        ->whereDate('date', now()->toDateString());
+                })
+                ->firstOrFail();
+
+            // อัปเดต summary
+            $report->update([
+                'summary_text' => $request->summary_text,
+            ]);
+
+            // ลบ tasks เดิม แล้วเพิ่มใหม่
+            $report->tasks()->delete();
+
+            foreach ($request->tasks as $task) {
+                $report->tasks()->create([
+                    'task_type' => $task['task_type'],
+                    'project_name' => $task['project_name'],
+                ]);
+            }
+
+            DB::commit();
+
+            return redirect()
+                ->route('daily-report.edit', $report->id)
+                ->with('success', 'อัปเดตรายงานเรียบร้อยแล้ว');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            // report($e);
+            dd($e->getMessage());
+
+            return back()
+                ->withErrors(['message' => 'เกิดข้อผิดพลาดขณะอัปเดตรายงาน กรุณาลองใหม่'])
+                ->withInput();
+        }
     }
+
 
     /**
      * Remove the specified resource from storage.

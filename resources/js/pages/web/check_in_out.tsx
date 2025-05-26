@@ -34,30 +34,43 @@ export default function ClockInOut() {
     });
 
     useEffect(() => {
+        // 1. ตั้งค่าเวลาให้เปลี่ยนทุกวินาที
         const timer = setInterval(() => {
             setNow(new Date().toLocaleString('th-TH', { dateStyle: 'long', timeStyle: 'medium' }));
         }, 1000);
+
+        // 2. ดึงตำแหน่งผู้ใช้
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const { latitude, longitude } = position.coords;
+                    setData((prev) => ({
+                        ...prev,
+                        lat: latitude.toString(),
+                        lng: longitude.toString(),
+                    }));
+                },
+                (error) => {
+                    console.error('Error getting location:', error);
+                },
+                { enableHighAccuracy: true },
+            );
+        } else {
+            console.warn('Geolocation not supported');
+        }
+
+        // cleanup
         return () => clearInterval(timer);
     }, []);
 
+    // ตั้งค่า type เมื่อ attendance เปลี่ยน
     useEffect(() => {
-        if (!navigator.geolocation) {
-            console.warn('Geolocation not supported');
-            return;
-        }
-
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                const { latitude, longitude } = position.coords;
-                setData('lat', latitude.toString());
-                setData('lng', longitude.toString());
-            },
-            (error) => {
-                console.error('Error getting location:', error);
-            },
-            { enableHighAccuracy: true },
-        );
-    }, []);
+        const isClockedIn = attendance && attendance.clock_in_time && !attendance.clock_out_time;
+        setData((prev) => ({
+            ...prev,
+            type: isClockedIn ? 'clock_out' : 'clock_in',
+        }));
+    }, [attendance]);
 
     const handleSubmit = () => {
         post(route('attendance.clock'), {
@@ -69,7 +82,7 @@ export default function ClockInOut() {
 
     const isClockedIn = attendance && attendance.clock_in_time && !attendance.clock_out_time;
 
-    console.log(isClockedIn);
+    // console.log(isClockedIn);
 
     const buttonLabel = isClockedIn ? 'Clock Out' : 'Clock In';
 
@@ -91,7 +104,7 @@ export default function ClockInOut() {
                                 }}
                             />
                             <label htmlFor="offsite" className="text-sm">
-                                ทำงานนอกสถานที่
+                                ทำงานนอกสถานที่ (เลือก)
                             </label>
                         </div>
 
@@ -108,7 +121,9 @@ export default function ClockInOut() {
                             </div>
                         ) : (
                             <div className="space-y-2">
-                                <label className="block text-sm font-medium">เลือกสาขา</label>
+                                <label className="block text-sm font-medium">
+                                    เลือกสาขา <span className="ms-1 text-red-500">*</span>
+                                </label>
                                 <Select value={data.branch_id} onValueChange={(value) => setData('branch_id', value)}>
                                     <SelectTrigger className="w-full">
                                         <SelectValue placeholder="-- เลือกสาขา --" />
@@ -142,17 +157,17 @@ export default function ClockInOut() {
                             </div>
                         )}
 
-                        <div className="flex justify-end gap-2 pt-4">
+                        <div className="flex flex-col justify-end gap-2 pt-4 sm:flex-row">
                             {/* ปุ่มเขียนรายงาน */}
                             {attendance?.clock_in_time && !attendance?.clock_out_time && (
-                                <Button asChild variant="secondary">
+                                <Button asChild variant="secondary" className="w-full sm:w-auto">
                                     <Link href={route('daily-report.create')}>เขียน Daily Report</Link>
                                 </Button>
                             )}
 
                             {/* ปุ่ม Clock In/Out */}
                             {!attendance?.clock_out_time && (
-                                <Button onClick={handleSubmit} disabled={processing} variant="default">
+                                <Button onClick={handleSubmit} disabled={processing} variant="default" className="w-full sm:w-auto">
                                     {buttonLabel}
                                 </Button>
                             )}
