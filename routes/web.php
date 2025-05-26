@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\Web\AttendanceController;
 use App\Http\Controllers\Web\DailyReportController;
@@ -20,9 +21,14 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/attendance/clock', [AttendanceController::class, 'clock'])->name('attendance.clock');
     Route::resource('/attendance/daily-report', DailyReportController::class);
     Route::get('/daily-report/history', [DailyReportController::class, 'history'])->name('daily-report.history');
+
+    Route::post('/client/logout', [AuthenticatedSessionController::class, 'cuslogout'])->name('client.logout');
 });
 
 
+Route::get('/backoffice/login', function () {
+    return Inertia::render('auth/login');
+});
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {

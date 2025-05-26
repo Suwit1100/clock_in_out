@@ -46,6 +46,17 @@ class AuthenticatedSessionController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
+        return redirect('/backoffice/login');
+    }
+
+    public function cuslogout()
+    {
+
+        Auth::guard('web')->logout();
+
+        session()->invalidate();
+        session()->regenerateToken();
+
         return redirect('/');
     }
 }
