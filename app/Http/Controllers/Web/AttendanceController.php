@@ -17,14 +17,12 @@ class AttendanceController extends Controller
 {
     public function showCheckInOutPage()
     {
-        $todayAttendance = Attendance::where('user_id', Auth::id())
+        $todayAttendance = Attendance::with('dailyReport')
+            ->where('user_id', Auth::id())
             ->whereDate('date', today())
             ->first();
 
-        $branches = Branch::select('id', 'name')->get();
-
-
-        // dd($todayAttendance);
+        $branches = Branch::all();
 
         return Inertia::render('web/check_in_out', [
             'attendance' => $todayAttendance,
@@ -169,18 +167,11 @@ class AttendanceController extends Controller
                     }
                 }
 
-                // ตรวจสอบว่าออกก่อนเวลา และยังไม่ได้ยืนยัน
-                if ($expectedEndTime && $now->lessThan($expectedEndTime)) {
-                    if (!$request->has('confirm_early')) {
-                        return back()->with([
-                            'early_leave_warning' => 'คุณกำลังจะลงเวลาออกก่อนเวลาเลิกงานเวลา ' . $expectedEndTime->format('H:i') . ' หากคุณต้องการยืนยัน โปรดกด Clock Out อีกครั้ง',
-                            'confirm_early_required' => true,
-                        ])->withInput();
-                    }
-
+                // ตรวจสอบออกก่อนเวลา
+                if ($expectedEndTime && $now->lt($expectedEndTime)) {
                     $attendance->status = 'early_leave';
                 } else {
-                    $attendance->status = $validated['is_offsite'] ? 'offsite' : 'on_time';
+                    $attendance->status = 'on_time';
                 }
 
                 $attendance->is_offsite_out = $validated['is_offsite'];
@@ -197,6 +188,7 @@ class AttendanceController extends Controller
                 return back()->with('success', 'Clock Out สำเร็จ');
             }
 
+
             return back()->withErrors(['คำสั่งไม่ถูกต้อง']);
         } catch (\Exception $e) {
             dd($e->getMessage());
@@ -204,7 +196,6 @@ class AttendanceController extends Controller
             return back()->withErrors(['เกิดข้อผิดพลาดในการดำเนินการ กรุณาลองใหม่อีกครั้ง']);
         }
     }
-
 
     private function calculateDistance($lat1, $lng1, $lat2, $lng2)
     {

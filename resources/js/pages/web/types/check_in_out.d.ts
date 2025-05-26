@@ -24,4 +24,19 @@ export interface AttendanceRecord {
     clock_out_location_lat: string | null;
     clock_out_location_lng: string | null;
     status: string | null;
+    daily_report?: {
+        id: number;
+        content: string;
+        created_at: string;
+    } | null;
+}
+
+export interface Branch {
+    id: number;
+    name: string;
+    latitude: string;
+    longitude: string;
+    radius_meters: number;
+    work_start_time: string;
+    work_end_time: string;
 }
