@@ -28,7 +28,18 @@ class DailyReportController extends Controller
      */
     public function create()
     {
-        return Inertia::render('web/daily_report/create');
+        $user = Auth::user();
+        $today = now()->toDateString();
+
+        // เช็คว่าเช็คอินแล้วหรือยัง
+        $attendance = Attendance::where('user_id', $user->id)
+            ->whereDate('date', $today)
+            ->first();
+
+
+        return Inertia::render('web/daily_report/create', [
+            'canWriteReport' => $attendance !== null,
+        ]);
     }
 
     /**
@@ -190,7 +201,7 @@ class DailyReportController extends Controller
         } catch (\Throwable $e) {
             DB::rollBack();
             // report($e);
-            dd($e->getMessage());
+            // dd($e->getMessage());
 
             return back()
                 ->withErrors(['message' => 'เกิดข้อผิดพลาดขณะอัปเดตรายงาน กรุณาลองใหม่'])

@@ -3,7 +3,7 @@ import AlertSuccess from '@/components/alert-success';
 import AlertWarning from '@/components/alert-warning';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -11,7 +11,7 @@ import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import MainLayout from '@/layouts/client-layout';
 import { Link, useForm, usePage } from '@inertiajs/react';
-import { ArrowLeft, Briefcase, CalendarDays, FileText, Plus, Save, Trash2 } from 'lucide-react';
+import { ArrowLeft, CalendarDays, FileText, Plus, Save, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { DailyReportForm, Task } from '../types/daily_report';
 import { PageProps } from '../types/global';
@@ -50,6 +50,7 @@ export default function EditDailyReport() {
     const removeTask = (index: number) => {
         if (data.tasks.length <= 1) {
             setShowWarning(true);
+            window.scrollTo({ top: 0, behavior: 'smooth' }); // 👈 เพิ่มตรงนี้
             setTimeout(() => setShowWarning(false), 3000);
             return;
         }
@@ -97,13 +98,6 @@ export default function EditDailyReport() {
 
                     <div className="mx-auto max-w-4xl">
                         <Card className="bg-card/95 overflow-hidden border-0 shadow-xl backdrop-blur-sm">
-                            <CardHeader className="from-primary/5 to-secondary/5 bg-gradient-to-r pb-6">
-                                <CardTitle className="flex items-center gap-3 text-2xl">
-                                    <Briefcase className="text-primary h-6 w-6" />
-                                    รายละเอียดการทำงาน
-                                </CardTitle>
-                            </CardHeader>
-
                             <CardContent className="space-y-8 p-6 lg:p-8">
                                 <div className="space-y-6">
                                     <div className="flex items-center justify-between">
@@ -149,7 +143,7 @@ export default function EditDailyReport() {
                                                     <div className="grid gap-4 md:grid-cols-2">
                                                         <div className="space-y-2">
                                                             <Label htmlFor={`task-type-${index}`} className="text-sm font-medium">
-                                                                ประเภทงาน
+                                                                ประเภทงาน <span className="ms-1 text-red-500">*</span>
                                                             </Label>
                                                             <Select
                                                                 value={task.task_type}
@@ -178,7 +172,7 @@ export default function EditDailyReport() {
 
                                                         <div className="space-y-2">
                                                             <Label htmlFor={`project-name-${index}`} className="text-sm font-medium">
-                                                                ชื่อโปรเจกต์
+                                                                ชื่อโปรเจกต์ <span className="ms-1 text-red-500">*</span>
                                                             </Label>
                                                             <Input
                                                                 id={`project-name-${index}`}

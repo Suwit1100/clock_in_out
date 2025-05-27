@@ -1,6 +1,14 @@
 import AlertError from '@/components/alert-error';
 import AlertSuccess from '@/components/alert-success';
 import AlertWarning from '@/components/alert-warning';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogContent,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -10,17 +18,26 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import MainLayout from '@/layouts/client-layout';
-import { Link, useForm, usePage } from '@inertiajs/react';
+import { Link, router, useForm, usePage } from '@inertiajs/react';
 import { ArrowLeft, CalendarDays, FileText, Plus, Save, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { DailyReportForm, Task } from '../types/daily_report';
 import { PageProps } from '../types/global';
 
 export default function DailyReport() {
     const { props } = usePage<PageProps>();
     const [showWarning, setShowWarning] = useState(false);
+    const [showWarningDialog, setShowWarningDialog] = useState(false);
     const successMessage = props.flash?.success;
     const systemError = props.errors?.message;
+
+    console.log(props.canWriteReport);
+
+    useEffect(() => {
+        if (!props.canWriteReport) {
+            setShowWarningDialog(true);
+        }
+    }, [props.canWriteReport]);
 
     const { data, setData, post, processing, errors } = useForm<Omit<DailyReportForm, 'note'>>({
         summary_text: '',
@@ -40,6 +57,7 @@ export default function DailyReport() {
     const removeTask = (index: number) => {
         if (data.tasks.length <= 1) {
             setShowWarning(true);
+            window.scrollTo({ top: 0, behavior: 'smooth' }); // 👈 เพิ่มตรงนี้
             setTimeout(() => setShowWarning(false), 3000);
             return;
         }
@@ -136,7 +154,7 @@ export default function DailyReport() {
                                                     <div className="grid gap-4 md:grid-cols-2">
                                                         <div className="space-y-2">
                                                             <Label htmlFor={`task-type-${index}`} className="text-sm font-medium">
-                                                                ประเภทงาน
+                                                                ประเภทงาน <span className="ms-1 text-red-500">*</span>
                                                             </Label>
                                                             <Select
                                                                 value={task.task_type}
@@ -165,7 +183,7 @@ export default function DailyReport() {
 
                                                         <div className="space-y-2">
                                                             <Label htmlFor={`project-name-${index}`} className="text-sm font-medium">
-                                                                ชื่อโปรเจกต์
+                                                                ชื่อโปรเจกต์ <span className="ms-1 text-red-500">*</span>
                                                             </Label>
                                                             <Input
                                                                 id={`project-name-${index}`}
@@ -251,6 +269,24 @@ export default function DailyReport() {
                     </div>
                 </div>
             </div>
+
+            <AlertDialog open={showWarningDialog}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>คุณยังไม่ได้เช็คอิน</AlertDialogTitle>
+                    </AlertDialogHeader>
+                    <p className="text-muted-foreground mt-2 text-sm">กรุณาเช็คอินก่อนจึงจะสามารถบันทึกรายงานได้</p>
+                    <AlertDialogFooter>
+                        <AlertDialogAction
+                            onClick={() => {
+                                router.visit(route('attendance.check_page'));
+                            }}
+                        >
+                            ไปเช็คอิน
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </MainLayout>
     );
 }

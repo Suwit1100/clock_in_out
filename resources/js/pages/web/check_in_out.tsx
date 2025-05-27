@@ -53,6 +53,7 @@ const attendanceSchema = yup.object().shape({
 
     offsite_link: yup
         .string()
+        .url('กรุณากรอกลิงก์ที่ถูกต้อง')
         .nullable()
         .when('is_offsite', {
             is: true,
@@ -213,8 +214,8 @@ export default function ClockInOut() {
                 <div className="container mx-auto px-4 py-8 lg:py-12">
                     {/* Header Section with Time Display */}
                     <div className="mb-8 text-center">
-                        <div className="bg-primary/10 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full shadow-lg">
-                            <Clock className="text-primary h-10 w-10" />
+                        <div className="bg-primary/10 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
+                            <Clock className="text-primary h-8 w-8" />
                         </div>
                         <h1 className="text-foreground mb-2 text-3xl font-bold tracking-tight lg:text-4xl">ลงเวลาเข้า-ออกงาน</h1>
                         <div className="bg-card/80 inline-flex items-center gap-2 rounded-full border px-6 py-3 shadow-md backdrop-blur-sm">
@@ -290,7 +291,7 @@ export default function ClockInOut() {
                                                 <Input
                                                     id="offsite-link"
                                                     type="text"
-                                                    placeholder="ลิงก์ Google Maps หรือพิกัด"
+                                                    placeholder="ลิงก์ Google Maps "
                                                     value={data.offsite_link}
                                                     onChange={(e) => {
                                                         setData('offsite_link', e.target.value);
@@ -392,6 +393,20 @@ export default function ClockInOut() {
                                                     </Card>
                                                 )}
                                             </div>
+
+                                            <div className="grid gap-4 sm:grid-cols-1">
+                                                {attendance?.daily_report ? (
+                                                    <Badge className="bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400">
+                                                        <FileText className="mr-2 h-4 w-4" />
+                                                        เขียน Daily Report แล้ว
+                                                    </Badge>
+                                                ) : (
+                                                    <Badge variant="outline" className="text-muted-foreground">
+                                                        <FileText className="mr-2 h-4 w-4" />
+                                                        ยังไม่ได้เขียน Daily Report
+                                                    </Badge>
+                                                )}
+                                            </div>
                                         </div>
                                     </>
                                 )}
@@ -401,9 +416,15 @@ export default function ClockInOut() {
                                     {/* ปุ่มเขียนรายงาน */}
                                     {attendance?.clock_in_time && !attendance?.clock_out_time && (
                                         <Button asChild variant="outline" className="hover:bg-accent/50 h-12 w-full border-2 px-6 sm:w-auto">
-                                            <Link href={route('daily-report.create')}>
+                                            <Link
+                                                href={
+                                                    attendance.daily_report
+                                                        ? route('daily-report.edit', attendance.daily_report.id)
+                                                        : route('daily-report.create')
+                                                }
+                                            >
                                                 <FileText className="mr-2 h-4 w-4" />
-                                                เขียน Daily Report
+                                                {attendance.daily_report ? 'แก้ไข Daily Report' : 'เขียน Daily Report'}
                                             </Link>
                                         </Button>
                                     )}
