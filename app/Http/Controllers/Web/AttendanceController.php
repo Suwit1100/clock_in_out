@@ -96,8 +96,9 @@ class AttendanceController extends Controller
                     $attendance->offsite_longitude = $validated['lng'];
                     $attendance->offsite_gmap_link_in = $validated['offsite_link'];
                 } else {
-                    $attendance->branch_id = $validated['branch_id'];
+                    $attendance->branch_in_id = $validated['branch_id'];
                     $branch = Branch::find($validated['branch_id']);
+                    $attendance->branch_in_id = $branch->id;
                     $distance = $this->calculateDistance(
                         $branch->latitude,
                         $branch->longitude,
@@ -122,6 +123,31 @@ class AttendanceController extends Controller
                 $attendance->clock_in_time = $now;
                 $attendance->clock_in_location_lat = $validated['lat'];
                 $attendance->clock_in_location_lng = $validated['lng'];
+
+                // คำนวณ clock_in_status
+                $expectedStartTime = null;
+
+                if ($validated['is_offsite']) {
+                    $offsite = OffsiteSetting::first();
+                    if ($offsite && $offsite->work_start_time) {
+                        $expectedStartTime = Carbon::createFromFormat('H:i:s', $offsite->work_start_time)->setDateFrom($now);
+                    }
+                } else {
+                    if (isset($branch) && $branch->work_start_time) {
+                        $expectedStartTime = Carbon::createFromFormat('H:i:s', $branch->work_start_time)->setDateFrom($now);
+                    }
+                }
+
+                if ($expectedStartTime) {
+                    if ($now->lt($expectedStartTime)) {
+                        $attendance->clock_in_status = 'early';
+                    } elseif ($now->eq($expectedStartTime)) {
+                        $attendance->clock_in_status = 'on_time';
+                    } else {
+                        $attendance->clock_in_status = 'late';
+                    }
+                }
+
                 $attendance->save();
 
                 return back()->with('success', 'Clock In สำเร็จ');
@@ -143,7 +169,7 @@ class AttendanceController extends Controller
                 $expectedEndTime = null;
 
                 if (!$validated['is_offsite']) {
-                    $branch = Branch::find($attendance->branch_id);
+                    $branch = Branch::find($validated['branch_id']);
                     if ($branch) {
                         $distance = $this->calculateDistance(
                             $branch->latitude,
@@ -159,6 +185,8 @@ class AttendanceController extends Controller
                         if ($branch->work_end_time) {
                             $expectedEndTime = Carbon::createFromFormat('H:i:s', $branch->work_end_time)->setDateFrom($now);
                         }
+
+                        $attendance->branch_out_id = $branch->id;
                     }
                 } else {
                     $offsite = OffsiteSetting::first();
@@ -167,11 +195,15 @@ class AttendanceController extends Controller
                     }
                 }
 
-                // ตรวจสอบออกก่อนเวลา
-                if ($expectedEndTime && $now->lt($expectedEndTime)) {
-                    $attendance->status = 'early_leave';
-                } else {
-                    $attendance->status = 'on_time';
+                //  คำนวณ clock_out_status
+                if ($expectedEndTime) {
+                    if ($now->lt($expectedEndTime)) {
+                        $attendance->clock_out_status = 'early';
+                    } elseif ($now->eq($expectedEndTime)) {
+                        $attendance->clock_out_status = 'on_time';
+                    } else {
+                        $attendance->clock_out_status = 'late';
+                    }
                 }
 
                 $attendance->is_offsite_out = $validated['is_offsite'];
@@ -211,5 +243,16 @@ class AttendanceController extends Controller
         $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
 
         return $earthRadius * $c;
+    }
+
+    public function index()
+    {
+        $attendances = Attendance::where('user_id', Auth::id())
+            ->orderByDesc('date')
+            ->paginate(30);
+
+        return Inertia::render('web/daily_report/history', [
+            'attendances' => $attendances,
+        ]);
     }
 }

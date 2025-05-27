@@ -18,8 +18,8 @@ class BranchSeeder extends Seeder
             'latitude' => 13.9192663,
             'longitude' => 100.5374425,
             'radius_meters' => 3000,
-            'work_start_time' => '08:00:00',
-            'work_end_time' => '17:00:00',
+            'work_start_time' => '08:30:00',
+            'work_end_time' => '17:30:00',
         ]);
 
         Branch::create([

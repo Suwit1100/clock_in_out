@@ -217,15 +217,4 @@ class DailyReportController extends Controller
     {
         //
     }
-
-    public function history()
-    {
-        $attendances = Attendance::where('user_id', Auth::id())
-            ->orderByDesc('date')
-            ->paginate(30);
-
-        return Inertia::render('web/daily_report/history', [
-            'attendances' => $attendances,
-        ]);
-    }
 }

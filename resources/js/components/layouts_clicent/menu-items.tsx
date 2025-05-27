@@ -23,7 +23,7 @@ export default function MenuItems({ isMobile }: { isMobile: boolean }) {
             label: 'Daily',
             href: dailyReportId ? `/attendance/daily-report/${dailyReportId}/edit` : '/attendance/daily-report/create',
         },
-        { icon: FileText, label: 'Report', href: '/daily-report/history' },
+        { icon: FileText, label: 'Report', href: '/attendance/history' },
     ];
 
     return (

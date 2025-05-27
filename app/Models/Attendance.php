@@ -12,7 +12,7 @@ class Attendance extends Model
     protected $fillable = [
         'user_id',
         'date',
-        'branch_id',
+        'branch_in_id',
         'is_offsite_in',
         'is_offsite_out',
         'offsite_latitude',
@@ -22,10 +22,13 @@ class Attendance extends Model
         'clock_in_time',
         'clock_in_location_lat',
         'clock_in_location_lng',
+        'clock_in_status',
         'clock_out_time',
         'clock_out_location_lat',
         'clock_out_location_lng',
-        'status'
+
+        'clock_out_status',
+        'branch_out_id',
     ];
 
     public function user()
@@ -39,5 +42,15 @@ class Attendance extends Model
     public function dailyReport()
     {
         return $this->hasOne(DailyReport::class);
+    }
+
+    public function branchIn()
+    {
+        return $this->belongsTo(Branch::class, 'branch_in_id');
+    }
+
+    public function branchOut()
+    {
+        return $this->belongsTo(Branch::class, 'branch_out_id');
     }
 }
