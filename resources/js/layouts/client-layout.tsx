@@ -13,14 +13,21 @@ export default function MainLayout({ children }: Props) {
     const { auth } = usePage<SharedData>().props;
 
     useEffect(() => {
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        setIsDark(prefersDark);
-        document.documentElement.classList.toggle('dark', prefersDark);
+        const savedTheme = localStorage.getItem('theme');
+
+        if (savedTheme === 'dark') {
+            setIsDark(true);
+            document.documentElement.classList.add('dark');
+        } else {
+            setIsDark(false);
+            document.documentElement.classList.remove('dark');
+        }
     }, []);
 
     const toggleTheme = () => {
         const newTheme = !isDark;
         setIsDark(newTheme);
+        localStorage.setItem('theme', newTheme ? 'dark' : 'light');
         document.documentElement.classList.toggle('dark', newTheme);
     };
 

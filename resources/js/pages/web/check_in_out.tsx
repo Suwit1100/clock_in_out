@@ -213,7 +213,7 @@ export default function ClockInOut() {
                 <div className="container mx-auto px-4 py-8 lg:py-12">
                     {/* Header Section with Time Display */}
                     <div className="mb-8 text-center">
-                        <div className="bg-primary/10 mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full shadow-lg">
+                        <div className="bg-primary/10 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full shadow-lg">
                             <Clock className="text-primary h-10 w-10" />
                         </div>
                         <h1 className="text-foreground mb-2 text-3xl font-bold tracking-tight lg:text-4xl">ลงเวลาเข้า-ออกงาน</h1>
