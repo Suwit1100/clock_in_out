@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import MainLayout from '@/layouts/client-layout';
-import { router, usePage } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
 import { formatISO } from 'date-fns';
 import { Building2, CalendarDays, Clock, Eye, Filter, MapPin, Minus, RotateCcw, TrendingDown, TrendingUp } from 'lucide-react';
 import { useState } from 'react';
@@ -363,7 +363,7 @@ export default function AttendanceHistory() {
                                                     <td className="px-6 py-4">
                                                         <button className="bg-primary text-primary-foreground hover:bg-primary/90 focus:ring-ring inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium shadow-sm transition-all duration-200 hover:shadow-md focus:ring-2 focus:ring-offset-2 focus:outline-none">
                                                             <Eye className="h-3 w-3" />
-                                                            ดูรายละเอียด
+                                                            <Link href={route('history.show', a.id)}> ดูรายละเอียด {a.id}</Link>
                                                         </button>
                                                     </td>
                                                 </tr>
