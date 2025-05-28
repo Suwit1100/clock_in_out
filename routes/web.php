@@ -32,7 +32,7 @@ Route::get('/backoffice/login', function () {
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', function () {
+    Route::get('/backoffice/dashboard', function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
 });
