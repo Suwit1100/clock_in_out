@@ -19,7 +19,7 @@ class AuthenticatedSessionController extends Controller
     public function create(Request $request): Response
     {
         return Inertia::render('auth/login', [
-            'canResetPassword' => Route::has('password.request'),
+            'canResetPassword' => Route::has('backoffice.password.request'),
             'status' => $request->session()->get('status'),
         ]);
     }
@@ -45,6 +45,17 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+
+        return redirect('/backoffice/login');
+    }
+
+    public function cuslogout()
+    {
+
+        Auth::guard('web')->logout();
+
+        session()->invalidate();
+        session()->regenerateToken();
 
         return redirect('/');
     }

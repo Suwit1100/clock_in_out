@@ -3,6 +3,8 @@ import type { Config } from 'ziggy-js';
 
 export interface Auth {
     user: User;
+    roles?: string[];
+    permissions?: string[];
 }
 
 export interface BreadcrumbItem {
@@ -35,9 +37,18 @@ export interface User {
     id: number;
     name: string;
     email: string;
-    avatar?: string;
+    employee_code?: string;
+    google_id?: string;
+    avatar_url?: string;
+    display_name?: string;
     email_verified_at: string | null;
     created_at: string;
     updated_at: string;
-    [key: string]: unknown; // This allows for additional properties...
+    roles: Role[];
+    [key: string]: unknown;
+}
+
+interface Role {
+    id: number;
+    name: string;
 }

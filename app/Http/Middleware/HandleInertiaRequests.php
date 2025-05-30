@@ -2,8 +2,10 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\DailyReport;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Middleware;
 use Tighten\Ziggy\Ziggy;
 
@@ -45,12 +47,38 @@ class HandleInertiaRequests extends Middleware
             'quote' => ['message' => trim($message), 'author' => trim($author)],
             'auth' => [
                 'user' => $request->user(),
+                'roles' => fn() => $request->user()?->getRoleNames(),
+                'permissions' => fn() => $request->user()?->getAllPermissions()->pluck('name'),
             ],
-            'ziggy' => fn (): array => [
+            'ziggy' => fn(): array => [
                 ...(new Ziggy)->toArray(),
                 'location' => $request->url(),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            'flash' => [
+                'success' => fn() => $request->session()->get('success'),
+                'error' => fn() => $request->session()->get('error'),
+                'warning_confirm' => fn() => $request->session()->get('warning_confirm'),
+            ],
+            'dailyReportId' => fn() => $this->getDailyReportId(),
         ];
+    }
+
+    protected function getDailyReportId(): ?int
+    {
+        if (!Auth::check()) {
+            return null;
+        }
+
+        $user = Auth::user();
+        $today = now()->toDateString();
+
+        $report = DailyReport::whereDate('created_at', $today)
+            ->whereHas('attendance', function ($q) use ($user) {
+                $q->where('user_id', $user->id);
+            })
+            ->first();
+
+        return $report?->id;
     }
 }
